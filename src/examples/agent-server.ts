@@ -4,7 +4,11 @@ import cors from 'cors';
 import { Agent, Config, Logger } from '../index';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT: number = parseInt(process.env.PORT as string) || 5000; // Ensure PORT is a number
+
+app.listen(PORT, '0.0.0.0', () => { // Bind to 0.0.0.0
+    console.log(`Server is running on port ${PORT}`);
+});
 
 app.use(cors());
 app.use(express.json());

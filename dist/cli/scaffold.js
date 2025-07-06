@@ -1,94 +1,72 @@
-
-
-import { Command } from 'commander';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
-
-const program = new Command();
-
-interface ScaffoldOptions {
-  name: string;
-  type: 'observer' | 'executor' | 'full';
-  directory?: string;
-}
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.scaffoldAgent = scaffoldAgent;
+const commander_1 = require("commander");
+const fs_1 = require("fs");
+const path_1 = require("path");
+const program = new commander_1.Command();
 program
-  .name('flow-agent-scaffold')
-  .description('Scaffold a new Flow EVM agent')
-  .version('0.1.0');
-
+    .name('flow-agent-scaffold')
+    .description('Scaffold a new Flow EVM agent')
+    .version('0.1.0');
 program
-  .command('create')
-  .description('Create a new Flow EVM agent')
-  .requiredOption('-n, --name <name>', 'Agent name')
-  .option('-t, --type <type>', 'Agent type (observer|executor|full)', 'full')
-  .option('-d, --directory <dir>', 'Output directory', '.')
-  .action(async (options: ScaffoldOptions) => {
+    .command('create')
+    .description('Create a new Flow EVM agent')
+    .requiredOption('-n, --name <name>', 'Agent name')
+    .option('-t, --type <type>', 'Agent type (observer|executor|full)', 'full')
+    .option('-d, --directory <dir>', 'Output directory', '.')
+    .action(async (options) => {
     await scaffoldAgent(options);
-  });
-
-async function scaffoldAgent(options: ScaffoldOptions) {
-  const { name, type, directory = '.' } = options;
-  const agentDir = join(directory, name);
-
-  console.log(`🚀 Creating Flow EVM agent: ${name}`);
-  console.log(`📁 Directory: ${agentDir}`);
-  console.log(`🔧 Type: ${type}`);
-
-  // Create directory if it doesn't exist
-  if (!existsSync(agentDir)) {
-    mkdirSync(agentDir, { recursive: true });
-  }
-
-  // Create package.json
-  const packageJson = {
-    name,
-    version: '0.1.0',
-    description: `Flow EVM agent: ${name}`,
-    main: 'dist/index.js',
-    scripts: {
-      build: 'tsc',
-      start: 'node dist/index.js',
-      dev: 'tsx src/index.ts'
-    },
-    dependencies: {
-      'flow-evm-agentkit': '^0.1.0'
-    },
-    devDependencies: {
-      'typescript': '^5.0.0',
-      'tsx': '^4.0.0',
-      '@types/node': '^20.0.0'
+});
+async function scaffoldAgent(options) {
+    const { name, type, directory = '.' } = options;
+    const agentDir = (0, path_1.join)(directory, name);
+    console.log(`🚀 Creating Flow EVM agent: ${name}`);
+    console.log(`📁 Directory: ${agentDir}`);
+    console.log(`🔧 Type: ${type}`);
+    // Create directory if it doesn't exist
+    if (!(0, fs_1.existsSync)(agentDir)) {
+        (0, fs_1.mkdirSync)(agentDir, { recursive: true });
     }
-  };
-
-  writeFileSync(
-    join(agentDir, 'package.json'),
-    JSON.stringify(packageJson, null, 2)
-  );
-
-  // Create tsconfig.json
-  const tsConfig = {
-    compilerOptions: {
-      target: 'ES2022',
-      module: 'commonjs',
-      outDir: './dist',
-      rootDir: './src',
-      strict: true,
-      esModuleInterop: true,
-      skipLibCheck: true,
-      forceConsistentCasingInFileNames: true
-    },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist']
-  };
-
-  writeFileSync(
-    join(agentDir, 'tsconfig.json'),
-    JSON.stringify(tsConfig, null, 2)
-  );
-
-  // Create .env.example
-  const envExample = `# Flow EVM Configuration
+    // Create package.json
+    const packageJson = {
+        name,
+        version: '0.1.0',
+        description: `Flow EVM agent: ${name}`,
+        main: 'dist/index.js',
+        scripts: {
+            build: 'tsc',
+            start: 'node dist/index.js',
+            dev: 'tsx src/index.ts'
+        },
+        dependencies: {
+            'flow-evm-agentkit': '^0.1.0'
+        },
+        devDependencies: {
+            'typescript': '^5.0.0',
+            'tsx': '^4.0.0',
+            '@types/node': '^20.0.0'
+        }
+    };
+    (0, fs_1.writeFileSync)((0, path_1.join)(agentDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+    // Create tsconfig.json
+    const tsConfig = {
+        compilerOptions: {
+            target: 'ES2022',
+            module: 'commonjs',
+            outDir: './dist',
+            rootDir: './src',
+            strict: true,
+            esModuleInterop: true,
+            skipLibCheck: true,
+            forceConsistentCasingInFileNames: true
+        },
+        include: ['src/**/*'],
+        exclude: ['node_modules', 'dist']
+    };
+    (0, fs_1.writeFileSync)((0, path_1.join)(agentDir, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
+    // Create .env.example
+    const envExample = `# Flow EVM Configuration
 FLOW_RPC_URL=https://mainnet.evm.nodes.onflow.org
 PRIVATE_KEY=your_private_key_here
 
@@ -100,48 +78,40 @@ AGENT_NAME=${name}
 LOG_LEVEL=info
 POLLING_INTERVAL=5000
 `;
-
-  writeFileSync(join(agentDir, '.env.example'), envExample);
-
-  // Create src directory
-  const srcDir = join(agentDir, 'src');
-  if (!existsSync(srcDir)) {
-    mkdirSync(srcDir);
-  }
-
-  // Create main agent file based on type
-  let agentCode = '';
-
-  switch (type) {
-    case 'observer':
-      agentCode = generateObserverAgent(name);
-      break;
-    case 'executor':
-      agentCode = generateExecutorAgent(name);
-      break;
-    case 'full':
-    default:
-      agentCode = generateFullAgent(name);
-      break;
-  }
-
-  writeFileSync(join(srcDir, 'index.ts'), agentCode);
-
-  // Create README
-  const readme = generateReadme(name, type);
-  writeFileSync(join(agentDir, 'README.md'), readme);
-
-  console.log(`✅ Agent scaffolded successfully!`);
-  console.log(`\nNext steps:`);
-  console.log(`1. cd ${name}`);
-  console.log(`2. npm install`);
-  console.log(`3. cp .env.example .env`);
-  console.log(`4. Edit .env with your configuration`);
-  console.log(`5. npm run dev`);
+    (0, fs_1.writeFileSync)((0, path_1.join)(agentDir, '.env.example'), envExample);
+    // Create src directory
+    const srcDir = (0, path_1.join)(agentDir, 'src');
+    if (!(0, fs_1.existsSync)(srcDir)) {
+        (0, fs_1.mkdirSync)(srcDir);
+    }
+    // Create main agent file based on type
+    let agentCode = '';
+    switch (type) {
+        case 'observer':
+            agentCode = generateObserverAgent(name);
+            break;
+        case 'executor':
+            agentCode = generateExecutorAgent(name);
+            break;
+        case 'full':
+        default:
+            agentCode = generateFullAgent(name);
+            break;
+    }
+    (0, fs_1.writeFileSync)((0, path_1.join)(srcDir, 'index.ts'), agentCode);
+    // Create README
+    const readme = generateReadme(name, type);
+    (0, fs_1.writeFileSync)((0, path_1.join)(agentDir, 'README.md'), readme);
+    console.log(`✅ Agent scaffolded successfully!`);
+    console.log(`\nNext steps:`);
+    console.log(`1. cd ${name}`);
+    console.log(`2. npm install`);
+    console.log(`3. cp .env.example .env`);
+    console.log(`4. Edit .env with your configuration`);
+    console.log(`5. npm run dev`);
 }
-
-function generateObserverAgent(name: string): string {
-  return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
+function generateObserverAgent(name) {
+    return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
 
 async function main() {
   console.log('🔍 Starting ${name} Observer Agent...');
@@ -198,9 +168,8 @@ if (require.main === module) {
 }
 `;
 }
-
-function generateExecutorAgent(name: string): string {
-  return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
+function generateExecutorAgent(name) {
+    return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
 
 async function main() {
   console.log('⚡ Starting ${name} Executor Agent...');
@@ -258,9 +227,8 @@ if (require.main === module) {
 }
 `;
 }
-
-function generateFullAgent(name: string): string {
-  return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
+function generateFullAgent(name) {
+    return `import { Agent, Config, Logger } from 'flow-evm-agentkit';
 
 async function main() {
   console.log('🤖 Starting ${name} Full Agent...');
@@ -348,9 +316,8 @@ if (require.main === module) {
 }
 `;
 }
-
-function generateReadme(name: string, type: string): string {
-  return `# ${name}
+function generateReadme(name, type) {
+    return `# ${name}
 
 A Flow EVM agent generated by Flow EVM AgentKit.
 
@@ -396,9 +363,7 @@ Edit \`src/index.ts\` to customize your agent's behavior:
 See the [Flow EVM AgentKit documentation](https://github.com/your-org/flow-evm-agentkit) for more details.
 `;
 }
-
 if (require.main === module) {
-  program.parse();
+    program.parse();
 }
-
-export { scaffoldAgent };
+//# sourceMappingURL=scaffold.js.map
