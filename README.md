@@ -1,4 +1,5 @@
 
+
 # Flow EVM AgentKit
 
 [![npm version](https://badge.fury.io/js/flow-evm-agentkit.svg)](https://badge.fury.io/js/flow-evm-agentkit)
@@ -144,68 +145,396 @@ agent.on('event', (event) => {
 });
 ```
 
-### 4. Send Transactions
+## 🚀 Agent Templates
 
+### Template 1: Basic Monitoring Agent
 ```typescript
-// The agent can execute transactions through goals
-agent.addGoal('Transfer 1 FLOW to 0x742d35Cc8C15C80085E31c65E8bB38C98b2a3B86');
+import { Agent, Config } from 'flow-evm-agentkit';
+import { config } from 'dotenv';
 
-// Or query for current state
-const balance = await agent.query('What is my current FLOW balance?');
-console.log('Balance response:', balance);
+config();
+
+async function createMonitoringAgent() {
+  const agent = new Agent(Config.load());
+  
+  // Set monitoring goals
+  agent.addGoal('Monitor all transactions on Flow EVM');
+  agent.addGoal('Alert when large transfers occur (>1000 FLOW)');
+  
+  // Event handling
+  agent.on('event', (event) => {
+    if (event.type === 'transaction') {
+      const tx = event.data.transaction;
+      const valueInFlow = parseFloat(tx.value) / 1e18;
+      
+      if (valueInFlow > 1000) {
+        console.log(`🚨 Large transfer detected: ${valueInFlow} FLOW`);
+        console.log(`Hash: ${tx.hash}`);
+      }
+    }
+  });
+  
+  await agent.start();
+  console.log('✅ Monitoring agent started');
+}
+
+createMonitoringAgent().catch(console.error);
 ```
 
-### 5. Smart Contract Interactions
-
+### Template 2: DeFi Trading Agent
 ```typescript
-// Deploy a contract
-agent.addGoal('Deploy an ERC-20 token contract with symbol "MYTOKEN"');
+import { Agent, Config } from 'flow-evm-agentkit';
+import { config } from 'dotenv';
 
-// Interact with existing contracts
-agent.addGoal('Call the transfer function on contract 0x... to send 100 tokens');
-```
+config();
 
-### 6. Monitor Blockchain Events
+async function createTradingAgent() {
+  const agent = new Agent(Config.load());
+  
+  // Trading strategy goals
+  agent.addGoal('Monitor DEX prices for arbitrage opportunities');
+  agent.addGoal('Execute trades when profit margin > 2%');
+  agent.addGoal('Maintain emergency reserve of 50 FLOW');
+  agent.addGoal('Rebalance portfolio every 24 hours');
+  
+  // Risk management
+  agent.addGoal('Stop trading if daily loss exceeds 5%');
+  
+  // Advanced event handling
+  agent.on('event', async (event) => {
+    if (event.type === 'log') {
+      // Check for swap events on DEXes
+      const log = event.data.log;
+      if (log.topics[0] === '0xd78ad95f...') { // Swap event signature
+        const swapData = parseSwapEvent(log);
+        await analyzeArbitrageOpportunity(agent, swapData);
+      }
+    }
+  });
+  
+  await agent.start();
+  console.log('💰 Trading agent started');
+}
 
-```typescript
-// The agent automatically monitors events, but you can listen to them
-agent.on('event', (event) => {
-  switch (event.type) {
-    case 'transaction':
-      console.log('Transaction detected:', {
-        hash: event.data.transaction.hash,
-        value: event.data.transaction.value
-      });
-      break;
-    case 'log':
-      console.log('Contract event:', {
-        address: event.data.log.address,
-        topics: event.data.log.topics
-      });
-      break;
+async function analyzeArbitrageOpportunity(agent: Agent, swapData: any) {
+  // Implement arbitrage logic
+  const profitMargin = calculateProfitMargin(swapData);
+  
+  if (profitMargin > 0.02) { // 2% minimum profit
+    agent.addGoal(`Execute arbitrage trade with ${profitMargin}% profit`);
   }
-});
+}
+
+function parseSwapEvent(log: any) {
+  // Parse DEX swap event data
+  return {
+    tokenIn: log.topics[1],
+    tokenOut: log.topics[2],
+    amountIn: parseInt(log.data.slice(0, 66), 16),
+    amountOut: parseInt(log.data.slice(66, 132), 16)
+  };
+}
+
+function calculateProfitMargin(swapData: any): number {
+  // Implement profit calculation logic
+  return 0.025; // 2.5% example
+}
+
+createTradingAgent().catch(console.error);
 ```
 
-### 7. Query Agent Intelligence
-
+### Template 3: NFT Collection Monitor
 ```typescript
-// Ask the agent questions about the blockchain
-const response = await agent.query('What was the last transaction I sent?');
-console.log('Agent response:', response);
+import { Agent, Config } from 'flow-evm-agentkit';
+import { config } from 'dotenv';
 
-// Get agent status
-const status = agent.getStatus();
-console.log('Agent status:', {
-  running: status.running,
-  goals: status.goals.length,
-  recentTasks: status.recentTasks.length
-});
+config();
+
+async function createNFTMonitor() {
+  const agent = new Agent(Config.load());
+  
+  const COLLECTION_ADDRESS = '0x...'; // Your NFT collection address
+  
+  // NFT monitoring goals
+  agent.addGoal(`Monitor ${COLLECTION_ADDRESS} for new mints`);
+  agent.addGoal('Track floor price changes');
+  agent.addGoal('Alert on rare trait combinations');
+  agent.addGoal('Auto-bid on underpriced NFTs');
+  
+  // Collection analytics
+  const collectionStats = {
+    totalMinted: 0,
+    floorPrice: 0,
+    volume24h: 0,
+    rareTrades: []
+  };
+  
+  agent.on('event', async (event) => {
+    if (event.type === 'log') {
+      const log = event.data.log;
+      
+      // NFT Transfer event
+      if (log.address.toLowerCase() === COLLECTION_ADDRESS.toLowerCase() &&
+          log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef') {
+        
+        const from = '0x' + log.topics[1].slice(26);
+        const to = '0x' + log.topics[2].slice(26);
+        const tokenId = parseInt(log.topics[3], 16);
+        
+        if (from === '0x0000000000000000000000000000000000000000') {
+          // New mint
+          console.log(`🎨 New NFT minted: Token #${tokenId}`);
+          collectionStats.totalMinted++;
+          
+          // Analyze rarity
+          const rarity = await analyzeNFTRarity(tokenId);
+          if (rarity.score > 90) {
+            agent.addGoal(`Consider bidding on rare NFT #${tokenId} (rarity: ${rarity.score})`);
+          }
+        } else {
+          // Transfer/Sale
+          console.log(`🔄 NFT #${tokenId} transferred from ${from} to ${to}`);
+        }
+      }
+    }
+  });
+  
+  // Periodic floor price updates
+  setInterval(async () => {
+    const newFloorPrice = await getCollectionFloorPrice(COLLECTION_ADDRESS);
+    if (Math.abs(newFloorPrice - collectionStats.floorPrice) / collectionStats.floorPrice > 0.1) {
+      console.log(`📈 Floor price changed: ${collectionStats.floorPrice} → ${newFloorPrice} FLOW`);
+      collectionStats.floorPrice = newFloorPrice;
+    }
+  }, 300000); // Every 5 minutes
+  
+  await agent.start();
+  console.log('🖼️ NFT monitor started');
+}
+
+async function analyzeNFTRarity(tokenId: number) {
+  // Implement rarity analysis
+  return { score: Math.random() * 100, traits: [] };
+}
+
+async function getCollectionFloorPrice(address: string): Promise<number> {
+  // Implement floor price fetching
+  return 1.5; // Example: 1.5 FLOW
+}
+
+createNFTMonitor().catch(console.error);
 ```
 
-## 🌐 Server Deployment
+### Template 4: Governance Participation Agent
+```typescript
+import { Agent, Config } from 'flow-evm-agentkit';
+import { config } from 'dotenv';
 
-For public deployment on Replit or other platforms:
+config();
+
+async function createGovernanceAgent() {
+  const agent = new Agent(Config.load());
+  
+  const DAO_CONTRACT = '0x...'; // DAO governance contract
+  
+  // Governance goals
+  agent.addGoal('Monitor new governance proposals');
+  agent.addGoal('Analyze proposal impacts on token economics');
+  agent.addGoal('Vote on proposals based on predefined criteria');
+  agent.addGoal('Delegate voting power when unavailable');
+  
+  // Voting criteria
+  const votingCriteria = {
+    maxTreasurySpend: 1000000, // Max 1M tokens
+    requiresSecurityAudit: true,
+    minDiscussionPeriod: 7 * 24 * 60 * 60 * 1000, // 7 days
+    autoApproveTypes: ['bug-fix', 'security-patch']
+  };
+  
+  agent.on('event', async (event) => {
+    if (event.type === 'log' && 
+        event.data.log.address.toLowerCase() === DAO_CONTRACT.toLowerCase()) {
+      
+      const log = event.data.log;
+      
+      // New proposal event
+      if (log.topics[0] === '0x...') { // ProposalCreated event signature
+        const proposalId = parseInt(log.topics[1], 16);
+        const proposal = await getProposalDetails(proposalId);
+        
+        console.log(`🗳️ New proposal #${proposalId}: ${proposal.title}`);
+        
+        // Analyze and decide vote
+        const decision = analyzeProposal(proposal, votingCriteria);
+        
+        if (decision.autoVote) {
+          agent.addGoal(`Vote ${decision.vote} on proposal #${proposalId}: ${decision.reason}`);
+        } else {
+          console.log(`⏳ Proposal #${proposalId} requires manual review: ${decision.reason}`);
+        }
+      }
+      
+      // Proposal executed
+      if (log.topics[0] === '0x...') { // ProposalExecuted event signature
+        const proposalId = parseInt(log.topics[1], 16);
+        console.log(`✅ Proposal #${proposalId} executed`);
+      }
+    }
+  });
+  
+  await agent.start();
+  console.log('🏛️ Governance agent started');
+}
+
+async function getProposalDetails(proposalId: number) {
+  // Fetch proposal details from contract or API
+  return {
+    id: proposalId,
+    title: 'Example Proposal',
+    description: 'Proposal description...',
+    type: 'treasury-spend',
+    amount: 500000,
+    createdAt: Date.now()
+  };
+}
+
+function analyzeProposal(proposal: any, criteria: any) {
+  // Auto-approve certain types
+  if (criteria.autoApproveTypes.includes(proposal.type)) {
+    return {
+      autoVote: true,
+      vote: 'FOR',
+      reason: `Auto-approved ${proposal.type}`
+    };
+  }
+  
+  // Check treasury spend limits
+  if (proposal.type === 'treasury-spend' && proposal.amount > criteria.maxTreasurySpend) {
+    return {
+      autoVote: true,
+      vote: 'AGAINST',
+      reason: `Treasury spend exceeds limit (${proposal.amount} > ${criteria.maxTreasurySpend})`
+    };
+  }
+  
+  return {
+    autoVote: false,
+    reason: 'Requires manual review'
+  };
+}
+
+createGovernanceAgent().catch(console.error);
+```
+
+### Template 5: Multi-Chain Bridge Monitor
+```typescript
+import { Agent, Config } from 'flow-evm-agentkit';
+import { config } from 'dotenv';
+
+config();
+
+async function createBridgeMonitor() {
+  const agent = new Agent(Config.load());
+  
+  const BRIDGE_CONTRACTS = {
+    flowToEth: '0x...',
+    ethToFlow: '0x...',
+    flowToBsc: '0x...'
+  };
+  
+  // Bridge monitoring goals
+  agent.addGoal('Monitor cross-chain bridge activity');
+  agent.addGoal('Track bridge liquidity levels');
+  agent.addGoal('Alert on unusual bridge activity');
+  agent.addGoal('Arbitrage cross-chain price differences');
+  
+  const bridgeStats = {
+    dailyVolume: new Map(),
+    liquidityLevels: new Map(),
+    priceDiscrepancies: new Map()
+  };
+  
+  agent.on('event', async (event) => {
+    if (event.type === 'log') {
+      const log = event.data.log;
+      const contractAddress = log.address.toLowerCase();
+      
+      // Check if it's a bridge contract
+      for (const [bridgeName, address] of Object.entries(BRIDGE_CONTRACTS)) {
+        if (contractAddress === address.toLowerCase()) {
+          await handleBridgeEvent(agent, bridgeName, log, bridgeStats);
+        }
+      }
+    }
+  });
+  
+  // Periodic arbitrage analysis
+  setInterval(async () => {
+    await analyzeCrossChainArbitrage(agent, bridgeStats);
+  }, 60000); // Every minute
+  
+  await agent.start();
+  console.log('🌉 Bridge monitor started');
+}
+
+async function handleBridgeEvent(agent: Agent, bridgeName: string, log: any, stats: any) {
+  // Bridge deposit event
+  if (log.topics[0] === '0x...') { // Deposit event signature
+    const amount = parseInt(log.data.slice(0, 66), 16);
+    const user = '0x' + log.topics[1].slice(26);
+    
+    console.log(`🔗 Bridge deposit: ${amount} tokens via ${bridgeName} from ${user}`);
+    
+    // Update volume stats
+    const today = new Date().toDateString();
+    const currentVolume = stats.dailyVolume.get(bridgeName + today) || 0;
+    stats.dailyVolume.set(bridgeName + today, currentVolume + amount);
+    
+    // Check for unusual activity
+    if (amount > 1000000) { // Large transfer threshold
+      agent.addGoal(`Investigate large bridge transfer: ${amount} tokens via ${bridgeName}`);
+    }
+  }
+  
+  // Bridge withdrawal event
+  if (log.topics[0] === '0x...') { // Withdrawal event signature
+    const amount = parseInt(log.data.slice(0, 66), 16);
+    console.log(`🔓 Bridge withdrawal: ${amount} tokens via ${bridgeName}`);
+  }
+}
+
+async function analyzeCrossChainArbitrage(agent: Agent, stats: any) {
+  // Get prices on different chains
+  const prices = await getCrossChainPrices();
+  
+  for (const [tokenPair, priceData] of Object.entries(prices)) {
+    const priceDiff = Math.abs(priceData.chainA - priceData.chainB) / priceData.chainA;
+    
+    if (priceDiff > 0.02) { // 2% price difference
+      console.log(`💰 Arbitrage opportunity: ${tokenPair} (${(priceDiff * 100).toFixed(2)}% difference)`);
+      agent.addGoal(`Execute arbitrage for ${tokenPair}: buy on ${priceData.cheaperChain}, sell on ${priceData.expensiveChain}`);
+    }
+  }
+}
+
+async function getCrossChainPrices() {
+  // Implement price fetching from multiple chains
+  return {
+    'FLOW/USDC': {
+      chainA: 1.25,
+      chainB: 1.28,
+      cheaperChain: 'Flow',
+      expensiveChain: 'Ethereum'
+    }
+  };
+}
+
+createBridgeMonitor().catch(console.error);
+```
+
+## 🌐 Server Deployment on Replit
+
+For public deployment:
 
 ```typescript
 import express from 'express';
@@ -296,6 +625,32 @@ The SDK is organized into intelligent, modular services:
 - **Planner**: AI-powered decision making and task planning
 - **Knowledge**: Vector-based memory storage and retrieval
 
+## 🚀 Advanced Use Cases
+
+### 1. MEV (Maximal Extractable Value) Bot
+```typescript
+// Implement sandwich attacks, arbitrage, and liquidation bots
+const mevAgent = new Agent(Config.load());
+mevAgent.addGoal('Monitor mempool for MEV opportunities');
+mevAgent.addGoal('Execute front-running strategies when profitable');
+```
+
+### 2. Liquidity Management
+```typescript
+// Automated liquidity provision and yield farming
+const liquidityAgent = new Agent(Config.load());
+liquidityAgent.addGoal('Manage liquidity positions across multiple DEXes');
+liquidityAgent.addGoal('Optimize yield farming strategies');
+```
+
+### 3. Risk Management System
+```typescript
+// Portfolio risk monitoring and automated hedging
+const riskAgent = new Agent(Config.load());
+riskAgent.addGoal('Monitor portfolio risk metrics');
+riskAgent.addGoal('Execute hedging strategies when risk exceeds threshold');
+```
+
 ## ⚠️ Error Handling
 
 Built-in error handling with detailed error types:
@@ -358,33 +713,6 @@ npm run lint
 | `LOG_LEVEL` | Logging level ('info', 'debug', 'error') | ❌ Optional |
 | `POLLING_INTERVAL` | Event polling interval in ms | ❌ Optional |
 
-## 📚 Examples
-
-### Transaction Monitor Agent
-```typescript
-import { Agent, Config } from 'flow-evm-agentkit';
-
-const agent = new Agent(Config.load());
-agent.addGoal('Monitor and log all transactions on Flow EVM');
-
-agent.on('event', (event) => {
-  if (event.type === 'transaction') {
-    console.log('New transaction:', event.data.transaction.hash);
-  }
-});
-
-await agent.start();
-```
-
-### Trading Bot Agent
-```typescript
-const agent = new Agent(Config.load());
-agent.addGoal('Execute trades when price conditions are favorable');
-agent.addGoal('Maintain portfolio balance above 100 FLOW');
-
-await agent.start();
-```
-
 ## 📚 Documentation & Resources
 
 - 🌐 **Flow Developer Portal**: [developers.flow.com](https://developers.flow.com)
@@ -419,3 +747,4 @@ This SDK is provided as-is for educational and development purposes. Users are r
 ---
 
 **Ready to build intelligent agents on Flow EVM?** Start with the Quick Start above and explore the power of AI-driven blockchain automation!
+

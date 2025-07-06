@@ -1,62 +1,30 @@
-
-# Source files (we want compiled JS, not TS)
+# Source files (keep TypeScript sources out of published package)
 src/
 tsconfig.json
-
-# Environment files
 .env*
-!.env.example
-
 # Development files
 *.test.ts
 *.spec.ts
 jest.config.js
-.prettierrc
-.eslintrc*
-
+*.test.js
+*.spec.js
 # IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
-
 # Logs
 logs/
 *.log
-npm-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# Dependency directories
+# Build artifacts we don't need
+dist/*.map
+dist/**/*.map
+# Development dependencies
 node_modules/
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
+# Git files
+.git/
+.gitignore
+# Documentation files (optional - you might want to include these)
+PUBLISHING.md
+attached_assets/
 # Replit specific files
 .replit
 replit.nix
-
-# Git
-.git/
-.gitignore
-
-# Documentation that's not needed in package
-PUBLISHING.md
-attached_assets/
-
-# Keep these files:
-# README.md - needed for package documentation
-# LICENSE - needed for license info
-# package.json - needed for package metadata
-# dist/ - compiled JavaScript and type definitions
-# .env.example - template for users
