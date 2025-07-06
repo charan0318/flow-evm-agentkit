@@ -58,10 +58,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/flow-evm-agentkit"
+    "url": "https://github.com/charan0318/flow-evm-agentkit"
   },
   "bugs": {
-    "url": "https://github.com/your-username/flow-evm-agentkit/issues"
+    "url": "https://github.com/charan0318/flow-evm-agentkit/issues"
   },
-  "homepage": "https://github.com/your-username/flow-evm-agentkit#readme"
+  "homepage": "https://github.com/charan0318/flow-evm-agentkit#readme"
 }

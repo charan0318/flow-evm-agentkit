@@ -532,47 +532,6 @@ async function getCrossChainPrices() {
 createBridgeMonitor().catch(console.error);
 ```
 
-## 🌐 Server Deployment on Replit
-
-For public deployment:
-
-```typescript
-import express from 'express';
-import { Agent, Config } from 'flow-evm-agentkit';
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-async function main() {
-  const config = Config.load();
-  const agent = new Agent(config);
-  
-  await agent.start();
-  
-  app.get('/', (req, res) => {
-    res.json({
-      message: 'Flow EVM Agent is running!',
-      status: agent.getStatus()
-    });
-  });
-  
-  app.get('/query/:question', async (req, res) => {
-    try {
-      const response = await agent.query(req.params.question);
-      res.json({ response });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-  
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Flow EVM Agent server running on port ${PORT}`);
-  });
-}
-
-main().catch(console.error);
-```
-
 ## 🤖 AI Integration with LangChain
 
 Create intelligent blockchain agents with AI decision-making:
