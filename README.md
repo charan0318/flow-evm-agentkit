@@ -68,7 +68,7 @@ cp .env.example .env
 Configure your environment:
 ```bash
 # Required
-FLOW_RPC_URL=https://mainnet.evm.nodes.onflow.org
+FLOW_RPC_URL=https://testnet.evm.nodes.onflow.org
 PRIVATE_KEY=your_private_key_here
 
 # Optional
