@@ -41,7 +41,7 @@ That's it! You now have a working Flow EVM blockchain agent. Read on for more de
 
 ## 📖 What is Flow EVM AgentKit?
 
-The Flow EVM AgentKit is a comprehensive TypeScript SDK designed for building intelligent, autonomous agents on the Flow EVM blockchain. Think of it as your AI-powered Swiss Army knife for Flow blockchain development.
+The Flow EVM AgentKit is a comprehensive TypeScript SDK designed for building intelligent, autonomous agents on the Flow EVM blockchain.
 
 ### What is Flow EVM?
 
