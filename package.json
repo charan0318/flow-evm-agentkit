@@ -11,7 +11,7 @@
     "server": "tsx src/examples/agent-server.ts",
     "trading": "tsx src/examples/trading-agent.ts",
     "tx-echo": "tsx src/examples/tx-echo-agent.ts",
-    "test": "jest --passWithNoTests"",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "prepublishOnly": "npm run build",
