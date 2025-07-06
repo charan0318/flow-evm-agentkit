@@ -292,9 +292,6 @@ await priceAgent.start();
 ### 1. Transaction Echo Agent
 Observes Flow EVM transactions and echoes them with analysis.
 
-### 2. Price Monitor Agent
-Monitors oracle prices and reacts to significant changes.
-
 ## 🔧 CLI Scaffold
 
 Generate a new agent:
