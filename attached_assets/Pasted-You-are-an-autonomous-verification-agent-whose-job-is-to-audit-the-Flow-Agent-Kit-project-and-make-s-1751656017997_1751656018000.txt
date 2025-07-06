@@ -1,0 +1,211 @@
+You are an autonomous verification agent whose job is to audit the Flow Agent Kit project and make sure it follows a complete, well-documented, production-ready layout. This includes confirming directory structure, documentation, tool registration, environment configuration, example usage, and the complete removal of all BNB Chain-related content (or replacing it appropriately). You must return a structured report with PASS/FAIL/WARNING flags, and provide exact diffs or instructions for fixing anything missing or incorrect.
+
+---
+
+## 🔍 OBJECTIVE
+
+You must check the **entire project** for:
+
+1. ✅ Proper project description in README
+2. ✅ Correct repository structure
+3. ✅ Quickstart section with prerequisites, install, env setup
+4. ✅ Usage examples with basic agent setup
+5. ✅ Tool availability (get_balance, transfer, swap, etc.)
+6. ✅ Integration with LangChain/OpenAI (or other LLMs)
+7. ✅ Example interactions in `examples/chatbot`
+8. ✅ No references to BNB Chain, BSC, opBNB, ListaDAO, PancakeSwap, or BSCScan
+9. ✅ Code organization in appropriate folders (actions/, tools/, utils/, etc.)
+10. ✅ Consistent naming (`flow-agentkit`, `FlowToolkit`, etc.)
+11. ✅ Valid LICENSE and legal/privacy section
+12. ✅ Functional `.env.example` file with required variables
+13. ✅ All commands in README are copy-pastable and functional
+14. ✅ Version pinning in `pyproject.toml`
+15. ✅ Transaction analytics and token price queries supported
+16. ✅ All placeholder URLs and addresses are generic or chain-agnostic
+
+---
+
+## 📂 STRUCTURE REQUIREMENTS
+
+Verify the following structure is present (flag anything missing or extra):
+
+flow-agentkit/
+├── README.md
+├── LICENSE
+├── .env.example
+├── pyproject.toml
+├── flow_agentkit/
+│ ├── actions/
+│ ├── agent_toolkits/
+│ ├── provider/
+│ ├── tools/
+│ └── utils/
+├── examples/
+│ └── chatbot/
+│ ├── README.md
+│ ├── chatbot_async.py
+│ └── pyproject.toml
+
+markdown
+Copy
+Edit
+
+---
+
+## 📚 DOCUMENTATION VALIDATION
+
+In `README.md`, verify the following **sections** are present, in order:
+
+1. `📖 Project Description`
+2. `🗂 Repository Structure`
+3. `🚀 Quickstart` (with Prerequisites, Installation, Environment Variables)
+4. `🔧 Usage` (Basic Setup, Using with an Agent)
+5. `💬 Example Interactions`
+6. `🧼 BNB Content Sanitization` or similar section confirming BNB is removed
+7. `🧪 Testing`
+8. `📝 License`
+9. `🔒 Legal and Privacy`
+10. `🙏 Credits`
+11. `📌 Notes` (with placeholder mentions like `<CHAIN_NAME>`)
+
+Flag anything missing, misordered, or unclear.
+
+---
+
+## 🛠 TOOLKIT FUNCTIONALITY CHECK
+
+Verify that `flow_agentkit.agent_toolkits.FlowToolkit` (or similar) exists and exposes all expected tools:
+
+- `get_balance`
+- `transfer`
+- `swap`
+- `stake`
+- `bridge`
+- `deploy` (ERC20, ERC721, ERC1155)
+- `analytics`
+- `price`
+
+Simulate or trace `get_tools()` and confirm that each of these tools is included.
+
+---
+
+## 🤖 AGENT FUNCTIONALITY CHECK
+
+Ensure that the agent is constructed properly:
+
+```python
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+llm = ChatOpenAI(model="gpt-4o")
+tools = flow_toolkit.get_tools()
+agent_executor = create_react_agent(llm, tools)
+Confirm this flow works in examples/chatbot/chatbot_async.py.
+
+Test that queries like “Check my balance” or “Swap token X for token Y” invoke the correct tool.
+
+Verify streamed results are handled correctly (event["messages"][-1].pretty_print()).
+
+💬 EXAMPLES INTERACTION CHECK
+In examples/chatbot, verify interaction responses match these patterns:
+
+Balance
+
+Input: get my balance
+
+Output: Your balance is approximately X
+
+Faucet
+
+Input: request test tokens
+
+Output: Successfully requested...
+
+Bridge
+
+Input: bridge 0.1 token from mainnet to testnet
+
+Output: Successfully bridged...
+
+Deploy
+
+Input: deploy ERC20 MyToken...
+
+Output: Deployed MyToken at address...
+
+Transfer
+
+Input: transfer 1 token to 0x...
+
+Output: Successfully transferred...
+
+Swap
+
+Input: swap 0.01 token A for token B
+
+Output: Swapped...
+
+Stake
+
+Input: stake 1 token
+
+Output: Staked...
+
+Analytics
+
+Input: show me last 5 txs
+
+Output: Tx 1... Tx 2...
+
+Token Price
+
+Input: what's the price of ETH
+
+Output: ETH is priced at $...
+
+Flag any interaction where output doesn't match expected.
+
+🧼 REMOVE BNB-SPECIFIC REFERENCES
+Search the entire project (code + docs + comments) for the following:
+
+❌ BNB Chain
+
+❌ BSC
+
+❌ opBNB
+
+❌ PancakeSwap
+
+❌ ListaDao
+
+❌ BSCScan
+
+If found:
+
+❗ Replace with placeholders like <CHAIN_NAME>, <DEX_NAME>, <EXPLORER_API_URL>
+
+✅ Ensure everything is generic, chain-agnostic, and production-neutral
+
+🧪 TESTING CHECK
+Ensure:
+
+Test cases exist for all tools.
+
+Mocks/stubs are used for blockchain calls.
+
+.env is loaded via dotenv or similar.
+
+Output is clear and user-facing.
+
+🔐 ENVIRONMENT VARIABLES VALIDATION
+Check that .env.example includes:
+
+PRIVATE_KEY
+
+CHAIN_PROVIDER_URL
+
+OPENAI_API_KEY
+
+Optional: SCAN_API_KEY, FAUCET_URL
+
+Ensure every variable used in code exists in .env.example.

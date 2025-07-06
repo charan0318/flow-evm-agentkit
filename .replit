@@ -1,0 +1,35 @@
+modules = ["nodejs-20", "python-3.12"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["bash", "libxcrypt"]
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 44595430
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "Test TX Echo Agent"
+author = 44595430
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx tsx src/examples/tx-echo-agent.ts"
+
+[[workflows.workflow]]
+name = "Test Chatbot Agent"
+author = 44595430
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx tsx src/examples/chatbot-agent.ts"
